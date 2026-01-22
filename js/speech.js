@@ -1,14 +1,24 @@
 const Speech = (() => {
+    // Obsługa prefiksów dla różnych przeglądarek (Chrome, Safari, etc.)
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+
     let rec = null;
     let onResultCallback, onErrorCallback, onEndCallback;
 
-    // Sprawdza dostępność rozpoznawania mowy
+    /**
+     * Sprawdza dostępność API SpeechRecognition w przeglądarce.
+     * @returns {boolean}
+     */
     function available() {
         return !!SpeechRecognition;
     }
 
-    // Rozpoczyna rozpoznawanie mowy
+    /**
+     * Inicjuje i uruchamia nasłuchiwanie.
+     * @param {Function} onResult - Callback wywoływany po rozpoznaniu tekstu.
+     * @param {Function} onError - Callback błędów.
+     * @param {Function} onEnd - Callback wywoływany po zakończeniu sesji nagrywania.
+     */
     function start(onResult, onError, onEnd) {
         if (!available()) {
             if (onError) onError(new Error('SpeechRecognition not available'));
@@ -21,16 +31,16 @@ const Speech = (() => {
 
         rec = new SpeechRecognition();
         rec.lang = 'pl-PL';
-        rec.interimResults = false;
+        rec.interimResults = false; // Zwracamy tylko finalne wyniki
         rec.maxAlternatives = 1;
 
-        rec.onresult = e => {
+        rec.onresult = (e) => {
             const transcript = e.results[e.results.length - 1][0].transcript.trim();
             if (onResultCallback) onResultCallback(transcript);
         };
 
-        rec.onerror = e => {
-            console.error('Błąd rozpoznawania mowy:', e);
+        rec.onerror = (e) => {
+            console.error('Speech API Error:', e);
             if (onErrorCallback) onErrorCallback(e);
         };
 
@@ -38,10 +48,16 @@ const Speech = (() => {
             if (onEndCallback) onEndCallback();
         };
 
-        rec.start();
+        try {
+            rec.start();
+        } catch (e) {
+            console.warn('Speech recognition start failed', e);
+        }
     }
 
-    // Zatrzymuje rozpoznawanie mowy
+    /**
+     * Przerywa aktywne nasłuchiwanie.
+     */
     function stop() {
         if (rec) {
             rec.stop();

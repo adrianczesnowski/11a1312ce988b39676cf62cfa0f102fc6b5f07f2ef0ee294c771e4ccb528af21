@@ -1,29 +1,12 @@
-/**
- * SERVICE WORKER — FajneNotatki
- * Odpowiada za:
- * - Pre-cache: Pobieranie i zapisywanie plików interfejsu przy instalacji.
- * - Strategie buforowania: Decydowanie skąd brać dane (sieć vs cache).
- * - Zarządzanie cyklem życia: Przejmowanie kontroli nad stroną bez odświeżania.
- */
-
 // =====================================================
-// KONFIGURACJA CACHE
+// KONFIGURACJA SERVICE WORKERA
 // =====================================================
 
-// Zmiana wersji wymusza usunięcie starych danych i pobranie nowych
-const CACHE_VERSION = "v12";
-
-// Magazyn dla plików statycznych (App Shell)
+const CACHE_VERSION = "v13";
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
-
-// Magazyn dla zasobów pobieranych w trakcie pracy (np. obrazy zewnętrzne)
 const RUNTIME_CACHE = `runtime-${CACHE_VERSION}`;
 
-// =====================================================
-// LISTA ZASOBÓW (APP SHELL)
-// =====================================================
-// Kluczowe pliki, które muszą działać offline.
-// UWAGA: Używamy ścieżek relatywnych "./", aby działały na GitHub/Netlify.
+// Lista plików niezbędnych do uruchomienia aplikacji (App Shell)
 const APP_SHELL_ASSETS = [
     "./",
     "./index.html",
@@ -37,30 +20,25 @@ const APP_SHELL_ASSETS = [
 ];
 
 // =====================================================
-// ZDARZENIE: INSTALL
+// CYKL ŻYCIA SW
 // =====================================================
+
 /**
- * @function install - Wywoływana przy pierwszym wejściu na stronę lub zmianie kodu SW.
- * Otwiera magazyn APP_SHELL_CACHE i zapisuje w nim listę plików ASSETS.
+ * Zdarzenie instalacji.
+ * Pobiera i cache'uje statyczne zasoby aplikacji.
  */
 self.addEventListener("install", (event) => {
     event.waitUntil(
         caches.open(APP_SHELL_CACHE).then((cache) => {
-            console.log("[SW] Instalacja: Cache'owanie zasobów");
             return cache.addAll(APP_SHELL_ASSETS);
         })
     );
-
-    // skipWaiting wymusza, aby nowy SW od razu stał się aktywny
     self.skipWaiting();
 });
 
-// =====================================================
-// ZDARZENIE: ACTIVATE
-// =====================================================
 /**
- * @function activate - Wywoływana, gdy nowy SW przejmuje kontrolę.
- * Służy do czyszczenia starych wersji cache (np. v5, gdy instalujemy v6).
+ * Zdarzenie aktywacji.
+ * Usuwa przestarzałe wersje cache'u przy aktualizacji wersji.
  */
 self.addEventListener("activate", (event) => {
     event.waitUntil(
@@ -68,33 +46,29 @@ self.addEventListener("activate", (event) => {
             Promise.all(
                 keys
                     .filter((k) => ![APP_SHELL_CACHE, RUNTIME_CACHE].includes(k))
-                    .map((k) => {
-                        console.log("[SW] Usuwanie starego cache:", k);
-                        return caches.delete(k);
-                    })
+                    .map((k) => caches.delete(k))
             )
         )
     );
-
-    // clients.claim pozwala SW zacząć działać na otwartych kartach bez ich odświeżania
     self.clients.claim();
 });
 
 // =====================================================
-// ZDARZENIE: FETCH
+// OBSŁUGA ZAPYTAŃ SIECIOWYCH
 // =====================================================
+
 /**
- * @function fetch - Interceptor wszystkich zapytań przeglądarki o pliki.
+ * Interceptor zapytań fetch.
+ * Implementuje strategie cache'owania dla różnych typów zasobów.
  */
 self.addEventListener("fetch", (event) => {
     const req = event.request;
     const url = new URL(req.url);
 
-    // Ignoruj zapytania do zewnętrznych domen (np. analityka, inne api)
+    // Ignorowanie domen zewnętrznych
     if (url.origin !== self.location.origin) return;
 
-    // NAVIGATION FALLBACK: Jeśli użytkownik odświeży stronę offline (brak pliku w cache),
-    // zawsze zwróć index.html, aby aplikacja mogła wystartować.
+    // Strategia dla nawigacji: Zawsze zwracaj index.html (SPA fallback)
     if (req.mode === "navigate") {
         event.respondWith(
             caches.match("./index.html").then((cached) => cached || fetch(req))
@@ -102,42 +76,33 @@ self.addEventListener("fetch", (event) => {
         return;
     }
 
-    // APP SHELL — STRATEGIA: CACHE FIRST
-    // Dla plików JS, CSS, HTML: najpierw szukaj w pamięci, jeśli brak — pobierz z sieci.
+    // Strategia: Cache First dla plików statycznych (App Shell)
     const isAppShell = APP_SHELL_ASSETS.includes(url.pathname) || url.pathname === "/";
     if (isAppShell) {
         event.respondWith(cacheFirst(req));
         return;
     }
 
-    // RUNTIME — STRATEGIA: STALE WHILE REVALIDATE
-    // Dla reszty plików: zwróć szybko to co masz w cache, ale w tle pobierz świeżą wersję.
+    // Strategia: Stale-While-Revalidate dla pozostałych zasobów
     event.respondWith(staleWhileRevalidate(req));
 });
 
-// =====================================================
-// STRATEGIE POBIERANIA (POMOCNICZE)
-// =====================================================
-
-/**
- * @function cacheFirst - Najpierw sprawdza cache. Jeśli nie znajdzie pliku,
- * pobiera go z sieci i przy okazji zapisuje kopię w cache.
- */
+// Pomocnicza: Najpierw cache, potem sieć (z aktualizacją cache'u)
 async function cacheFirst(request) {
     const cached = await caches.match(request);
     if (cached) return cached;
 
-    const fresh = await fetch(request);
-    const cache = await caches.open(APP_SHELL_CACHE);
-    cache.put(request, fresh.clone());
-
-    return fresh;
+    try {
+        const fresh = await fetch(request);
+        const cache = await caches.open(APP_SHELL_CACHE);
+        cache.put(request, fresh.clone());
+        return fresh;
+    } catch (e) {
+        return new Response('Network error', { status: 408 });
+    }
 }
 
-/**
- * @function staleWhileRevalidate - Zwraca zasób z cache (szybkość),
- * a w tle wysyła zapytanie do sieci, by zaktualizować cache na następny raz.
- */
+// Pomocnicza: Zwróć cache natychmiast, w tle pobierz nową wersję
 async function staleWhileRevalidate(request) {
     const cache = await caches.open(RUNTIME_CACHE);
     const cached = await cache.match(request);
@@ -147,7 +112,7 @@ async function staleWhileRevalidate(request) {
             cache.put(request, fresh.clone());
             return fresh;
         })
-        .catch(() => cached); // Jeśli brak sieci, zwróć to co było w cache
+        .catch(() => cached);
 
     return cached || networkFetch;
 }
