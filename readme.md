@@ -1,71 +1,56 @@
 # FajneNotatki - PWA
 
-Progresywna Aplikacja Webowa (PWA) służąca do bezpiecznego tworzenia i przechowywania notatek multimedialnych. Aplikacja działa w pełni offline, wykorzystuje natywne funkcje urządzenia i zabezpiecza dostęp za pomocą biometrii lub kodu PIN.
+Progresywna Aplikacja Webowa (PWA) służąca do bezpiecznego tworzenia i przechowywania notatek multimedialnych. Aplikacja działa w modelu **Local-First**, co oznacza, że Twoje dane nigdy nie opuszczają urządzenia.
 
-## Uruchomienie projektu
+## Szybki Start
 
-Aplikacja nie wymaga procesu budowania. Aby zadziałały funkcje PWA (Service Worker, Kamera, Mikrofon), aplikacja **musi być serwowana przez HTTPS** lub `localhost`.
+Aplikacja jest gotowa do użycia i nie wymaga kompilacji. Ze względu na bezpieczeństwo (WebAuthn, Kamera), wymagane jest połączenie **HTTPS**.
 
-### Opcja 1: GitHub Pages / Netlify
-Wgraj pliki na hosting obsługujący HTTPS.
-1. Wrzuć pliki na repozytorium GitHub.
-2. Włącz GitHub Pages w ustawieniach repozytorium.
-3. Otwórz wygenerowany link na telefonie.
-
-### Opcja 2: Lokalnie
-1. Zainstaluj rozszerzenie "Live Server" w VS Code.
-2. Kliknij prawym przyciskiem na `index.html` -> "Open with Live Server".
-3. Aplikacja otworzy się pod adresem `http://127.0.0.1:5500`.
+### Hosting (GitHub Pages / Netlify)
+1. Wgraj pliki zachowując strukturę folderów.
+2. Upewnij się, że `sw.js` znajduje się w katalogu głównym (root).
+3. Po otwarciu strony na iOS użyj opcji "Dodaj do ekranu początkowego", aby uzyskać pełny tryb PWA.
 
 ---
 
-### 1. Instalowalność
-Aplikacja posiada poprawny plik `manifest.json` oraz ikony. Użytkownik może dodać aplikację do ekranu głównego (A2HS).
-* **Implementacja:** `manifest.json`, obsługa zdarzenia `beforeinstallprompt` w `js/app.js`.
+## Kluczowe Funkcje PWA
 
-### 2. Wykorzystanie funkcji natywnych
-Aplikacja integruje się z API przeglądarki i sprzętu:
-1.  **Kamera (MediaDevices API):** Umożliwia wykonanie zdjęcia i dołączenie go bezpośrednio do treści notatki. Podgląd wideo realizowany jest w elemencie `<video>`, a przechwycenie klatki na `<canvas>`.
-2.  **Mikrofon (Web Speech API):** Umożliwia dyktowanie treści notatki (Speech-to-Text).
-3.  **Biometria (WebAuthn API):** Umożliwia logowanie za pomocą odcisku palca lub FaceID (jeśli urządzenie wspiera `platform authenticator`).
+### 1. Tryb Offline
+Zastosowano zaawansowaną strategię buforowania w pliku `sw.js`:
+* **App Shell (Cache First):** Kluczowe pliki (`index.html`, `style.css`, skrypty JS) są ładowane natychmiast z pamięci podręcznej.
+* **Dynamic Assets (Stale-While-Revalidate):** Ikony i inne zasoby są serwowane z cache, a w tle następuje ich cicha aktualizacja.
+* **Navigation Fallback:** W przypadku braku sieci, zapytania nawigacyjne są zawsze kierowane do `index.html`.
 
-### 3. Tryb Offline i Strategia Buforowania
-Aplikacja jest w pełni funkcjonalna bez dostępu do Internetu.
-* **Service Worker (`sw.js`):** Wykorzystuje strategię **Cache First** dla zasobów statycznych (HTML, CSS, JS, ikony), co zapewnia natychmiastowe ładowanie.
-* **IndexedDB:** Wszystkie notatki (tekst + zdjęcia base64) są zapisywane w lokalnej bazie danych przeglądarki.
-* **UI:** Aplikacja wykrywa status sieci (`navigator.onLine`) i wyświetla komunikat ostrzegawczy w trybie offline.
+### 2. Bezpieczeństwo i Autoryzacja
+Aplikacja oferuje dwa poziomy zabezpieczeń zarządzane przez `js/auth.js`:
+* **Biometria (WebAuthn):** Wykorzystuje czytniki linii papilarnych lub rozpoznawanie twarzy (FaceID/TouchID). Dane biometryczne są przechowywane w bezpiecznym module urządzenia (platform authenticator).
+* **Kod PIN:** Proste zabezpieczenie alternatywne przechowywane w `localStorage`. 
+    * *Uwaga:* Obecna wersja wspiera jeden profil użytkownika na danej przeglądarce.
 
-### 4. Architektura Widoków
-Aplikacja posiada spójny przepływ składający się z 4 głównych widoków przełączanych dynamicznie bez przeładowania strony:
-1.  **Auth View:** Logowanie (Biometria/PIN).
-2.  **List View:** Lista notatek z wyszukiwarką.
-3.  **Editor View:** Edycja, obsługa kamery i mikrofonu.
-4.  **Settings View:** Informacje o aplikacji i reset danych.
+### 3. Multimedia i Sprzęt
+* **Aparat:** Przechwytywanie zdjęć do notatek za pomocą API `MediaDevices`. Obrazy są przetwarzane na format Base64 i przechowywane lokalnie.
+* **Dyktowanie (Speech-to-Text):** Integracja z Web Speech API umożliwia wprowadzanie tekstu za pomocą głosu (wymaga wsparcia przeglądarki, np. Chrome/Safari).
+
+### 4. Baza Danych (IndexedDB)
+Zamiast limitowanego `localStorage`, notatki są zapisywane w **IndexedDB** (`js/db.js`). Pozwala to na:
+* Przechowywanie dużych ilości danych (w tym zdjęć).
+* Szybkie przeszukiwanie treści notatek.
+* Trwałość danych nawet po zamknięciu przeglądarki lub restarcie urządzenia.
 
 ---
 
-## 🛠 Technologie
-
-* **HTML5:** Semantyczna struktura.
-* **CSS3:** Framework **Bootstrap 5** dla responsywności.
-* **JavaScript (ES6+):** Logika aplikacji podzielona na moduły:
-    * `app.js`: Główny kontroler UI i nawigacji.
-    * `db.js`: Obsługa IndexedDB (CRUD).
-    * `auth.js`: Obsługa WebAuthn i PIN.
-    * `speech.js`: Wrapper na SpeechRecognition API.
-
-## 📂 Struktura plików
+## Struktura Projektu
 
 ```text
 /
-├── index.html          # Główny plik aplikacji
-├── manifest.json       # Metadane PWA
-├── sw.js               # Service Worker
+├── index.html          # Struktura UI (Bootstrap 5)
+├── manifest.json       # Konfiguracja instalacji PWA
+├── sw.js               # Service Worker (Logika Offline)
 ├── css/
-│   └── style.css       # Style niestandardowe
+│   └── style.css       # Style i poprawki interfejsu
 ├── js/
-│   ├── app.js          # Logika widoków i zdarzeń
-│   ├── db.js           # Warstwa danych (IndexedDB)
-│   ├── auth.js         # Logika autoryzacji
-│   └── speech.js       # Obsługa mikrofonu
-└── assets/             # Ikony aplikacji
+│   ├── app.js          # Główny kontroler widoków i nawigacji
+│   ├── db.js           # Obsługa bazy danych IndexedDB
+│   ├── auth.js         # Obsługa biometrii i PINu
+│   └── speech.js       # Integracja z rozpoznawaniem mowy
+└── assets/             # Ikony (192x192, 512x512)

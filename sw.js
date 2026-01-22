@@ -8,6 +8,7 @@ const APP_SHELL_ASSETS = [
     "./css/style.css",
     "./manifest.json",
     "./js/app.js",
+    "./sw.js",
     "./js/db.js",
     "./js/auth.js",
     "./js/speech.js",
