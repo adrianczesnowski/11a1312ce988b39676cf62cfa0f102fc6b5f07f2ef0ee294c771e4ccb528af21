@@ -52,7 +52,10 @@ const app = (() => {
         const btnSettings = getEl('btn-go-settings');
         const btnBack = getEl('btn-go-list');
 
+        // Przycisk ustawień widoczny tylko na liście notatek
         btnSettings?.classList.toggle('d-none', viewName !== 'list');
+
+        // Przycisk wstecz widoczny wszędzie POZA listą i ekranem logowania
         btnBack?.classList.toggle('d-none', viewName === 'list' || viewName === 'auth');
 
         // Cleanup: wyłączenie kamery przy wyjściu z edytora
@@ -259,7 +262,7 @@ const app = (() => {
         }
     });
 
-    // Powrót do listy
+    // Powrót do listy (uniwersalny przycisk "Wróć")
     addClick('btn-go-list', () => {
         showView('list');
         loadNotes();
@@ -355,8 +358,29 @@ const app = (() => {
 
 
     // ============================================================
-    // MODUŁ 4: SYSTEM
+    // MODUŁ 4: SYSTEM I USTAWIENIA
     // ============================================================
+
+    // Nawigacja do panelu ustawień
+    addClick('btn-go-settings', () => {
+        showView('settings');
+    });
+
+    // Obsługa pełnego resetu aplikacji (usuwanie danych)
+    addClick('btn-full-reset', async () => {
+        if (confirm('Czy na pewno chcesz usunąć WSZYSTKIE notatki i dane logowania? Tej operacji nie można cofnąć.')) {
+            // Usuwanie wszystkich notatek z IndexedDB
+            const notes = await DB.getAll();
+            const deletePromises = notes.map(n => DB.deleteNote(n.id));
+            await Promise.all(deletePromises);
+
+            // Czyszczenie LocalStorage (PIN, credential ID)
+            localStorage.clear();
+
+            // Przeładowanie aplikacji do stanu początkowego
+            window.location.reload();
+        }
+    });
 
     // Monitorowanie stanu sieci
     window.addEventListener('online', () => ui.offlineIndicator.style.display = 'none');
