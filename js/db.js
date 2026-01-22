@@ -1,71 +1,60 @@
 const DB = (() => {
-    const dbName = 'secure-notes';
-    const storeName = 'notes';
+    const DB_NAME = 'secure-notes';
+    const STORE_NAME = 'notes';
 
-    // Funkcja otwierająca połączenie z IndexedDB
+    /**
+     * @function openDB - Inicjuje połączenie z IndexedDB i tworzy magazyn jeśli nie istnieje.
+     */
     function openDB() {
         return new Promise((resolve, reject) => {
-            const request = indexedDB.open(dbName, 1);
-            request.onupgradeneeded = e => {
-                const db = e.target.result;
-                if (!db.objectStoreNames.contains(storeName)) {
-                    db.createObjectStore(storeName, { keyPath: 'id' });
-                }
-            };
+            const request = indexedDB.open(DB_NAME, 1);
+            request.onupgradeneeded = e => e.target.result.createObjectStore(STORE_NAME, { keyPath: 'id' });
             request.onsuccess = e => resolve(e.target.result);
             request.onerror = e => reject(e.target.error);
         });
     }
 
-    // Dodaje lub aktualizuje notatkę
+    /**
+     * @function addNote - Zapisuje lub aktualizuje obiekt notatki.
+     */
     async function addNote(note) {
         const db = await openDB();
-        const tx = db.transaction(storeName, 'readwrite');
-        tx.objectStore(storeName).put(note);
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).put(note);
         return tx.complete;
     }
 
-    // Pobiera wszystkie notatki
+    /**
+     * @function getAll - Pobiera wszystkie notatki z bazy.
+     */
     async function getAll() {
         const db = await openDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction(storeName, 'readonly');
-            const store = tx.objectStore(storeName);
-            const req = store.getAll();
+        return new Promise(resolve => {
+            const req = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).getAll();
             req.onsuccess = () => resolve(req.result);
-            req.onerror = e => reject(e.target.error);
         });
     }
 
-    // Pobiera notatkę o danym ID
+    /**
+     * @function getNote - Pobiera jedną notatkę po ID.
+     */
     async function getNote(id) {
         const db = await openDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction(storeName, 'readonly');
-            const store = tx.objectStore(storeName);
-            const req = store.get(id);
+        return new Promise(resolve => {
+            const req = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(id);
             req.onsuccess = () => resolve(req.result);
-            req.onerror = e => reject(e.target.error);
         });
     }
 
-    // Usuwa notatkę o danym ID
+    /**
+     * @function deleteNote - Usuwa notatkę o podanym ID.
+     */
     async function deleteNote(id) {
         const db = await openDB();
-        const tx = db.transaction(storeName, 'readwrite');
-        tx.objectStore(storeName).delete(id);
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).delete(id);
         return tx.complete;
     }
 
-    // Usuwa wszystkie notatki
-    async function clearAll() {
-        return new Promise((resolve, reject) => {
-            const req = indexedDB.deleteDatabase(dbName);
-            req.onsuccess = () => resolve();
-            req.onerror = () => reject();
-            req.onblocked = () => resolve();
-        });
-    }
-
-    return { addNote, getAll, getNote, deleteNote, clearAll };
+    return { addNote, getAll, getNote, deleteNote };
 })();
