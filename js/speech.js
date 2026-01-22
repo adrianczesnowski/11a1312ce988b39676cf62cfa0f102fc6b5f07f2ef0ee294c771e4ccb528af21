@@ -3,10 +3,12 @@ const Speech = (() => {
     let rec = null;
     let onResultCallback, onErrorCallback, onEndCallback;
 
+    // Sprawdza dostępność rozpoznawania mowy
     function available() {
         return !!SpeechRecognition;
     }
 
+    // Rozpoczyna rozpoznawanie mowy
     function start(onResult, onError, onEnd) {
         if (!available()) {
             if (onError) onError(new Error('SpeechRecognition not available'));
@@ -39,6 +41,7 @@ const Speech = (() => {
         rec.start();
     }
 
+    // Zatrzymuje rozpoznawanie mowy
     function stop() {
         if (rec) {
             rec.stop();

@@ -2,6 +2,7 @@ const DB = (() => {
     const dbName = 'secure-notes';
     const storeName = 'notes';
 
+    // Funkcja otwierająca połączenie z IndexedDB
     function openDB() {
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(dbName, 1);
@@ -16,6 +17,7 @@ const DB = (() => {
         });
     }
 
+    // Dodaje lub aktualizuje notatkę
     async function addNote(note) {
         const db = await openDB();
         const tx = db.transaction(storeName, 'readwrite');
@@ -23,6 +25,7 @@ const DB = (() => {
         return tx.complete;
     }
 
+    // Pobiera wszystkie notatki
     async function getAll() {
         const db = await openDB();
         return new Promise((resolve, reject) => {
@@ -34,6 +37,7 @@ const DB = (() => {
         });
     }
 
+    // Pobiera notatkę o danym ID
     async function getNote(id) {
         const db = await openDB();
         return new Promise((resolve, reject) => {
@@ -45,6 +49,7 @@ const DB = (() => {
         });
     }
 
+    // Usuwa notatkę o danym ID
     async function deleteNote(id) {
         const db = await openDB();
         const tx = db.transaction(storeName, 'readwrite');
@@ -52,6 +57,7 @@ const DB = (() => {
         return tx.complete;
     }
 
+    // Usuwa wszystkie notatki
     async function clearAll() {
         return new Promise((resolve, reject) => {
             const req = indexedDB.deleteDatabase(dbName);

@@ -1,4 +1,5 @@
 const app = (() => {
+    // Funkcja pomocnicza do pobierania elementów DOM
     const getEl = (id) => document.getElementById(id);
 
     const views = {
@@ -34,6 +35,7 @@ const app = (() => {
     let currentNoteId = null;
     let cameraStream = null;
 
+    // Funkcja do przełączania widoków
     function showView(viewName) {
         if (!views[viewName]) return;
         Object.values(views).forEach(el => {
@@ -55,6 +57,7 @@ const app = (() => {
         }
     }
 
+    // Funkcja pomocnicza do dodawania obsługi kliknięć
     const addClick = (id, fn) => {
         const el = getEl(id);
         if (el) el.addEventListener('click', fn);
@@ -118,11 +121,13 @@ const app = (() => {
         enterApp();
     });
 
+    // Funkcja wejścia do aplikacji po uwierzytelnieniu
     function enterApp() {
         showView('list');
         loadNotes();
     }
 
+    // Funkcja ładowania notatek i renderowania listy
     async function loadNotes() {
         if (typeof DB === 'undefined') return;
         try {
@@ -221,6 +226,7 @@ const app = (() => {
         stopCamera();
     });
 
+    // Funkcja zatrzymująca kamerę i ukrywająca interfejs
     function stopCamera() {
         if (cameraStream) {
             cameraStream.getTracks().forEach(t => t.stop());
@@ -229,6 +235,7 @@ const app = (() => {
         if (ui.camInterface) ui.camInterface.style.display = 'none';
     }
 
+    // Funkcja resetująca pola formularza
     function resetEditor() {
         ui.title.value = '';
         ui.body.value = '';
@@ -238,6 +245,7 @@ const app = (() => {
         stopCamera();
     }
 
+    // Funkcja otwierająca notatkę w formularzu
     async function openNote(id) {
         const n = await DB.getNote(id);
         if (!n) return;
@@ -296,6 +304,7 @@ const app = (() => {
         if (ui.installAlert) ui.installAlert.classList.add('d-none');
     });
 
+    // Funkcja do sprawdzania statusu online/offline
     const checkOnline = () => {
         if (ui.offlineIndicator) ui.offlineIndicator.style.display = navigator.onLine ? 'none' : 'block';
     };
