@@ -11,7 +11,7 @@
 // =====================================================
 
 // Zmiana wersji wymusza usunięcie starych danych i pobranie nowych
-const CACHE_VERSION = "v10";
+const CACHE_VERSION = "v12";
 
 // Magazyn dla plików statycznych (App Shell)
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
