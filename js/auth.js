@@ -1,83 +1,125 @@
-const Auth = (() => {
-    const CRED_KEY = 'webauthn-cred';
-    const PIN_KEY = 'securenotes-pin';
+const CRED_KEY = 'webauthn-cred';
+const PIN_KEY = 'securenotes-pin-hash';
+const SESSION_KEY = 'is-logged-in';
 
-    /**
-     * Rejestruje nowe poświadczenie biometryczne (WebAuthn/Passkeys).
-     * Tworzy parę kluczy i zapisuje identyfikator (rawId) w localStorage.
-     * Wymaga kontekstu bezpiecznego (HTTPS lub localhost).
-     */
-    async function register() {
-        try {
-            // Generowanie losowego challenge'a dla serwera (tutaj symulowane lokalnie)
-            const challenge = crypto.getRandomValues(new Uint8Array(32));
+/**
+ * Pomocnicza funkcja do hashowania PIN-u (SHA-256).
+ * Zwraca ciąg heksadecymalny.
+ * @param {string} pin
+ * @returns {Promise<string>}
+ */
+async function hashPin(pin) {
+    const msgBuffer = new TextEncoder().encode(pin);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
-            const pubKey = {
-                challenge,
-                rp: { name: 'FajneNotatki' },
-                user: {
-                    id: new TextEncoder().encode('user'),
-                    name: 'user',
-                    displayName: 'Użytkownik'
-                },
-                pubKeyCredParams: [{ alg: -7, type: 'public-key' }],
-                authenticatorSelection: { authenticatorAttachment: 'platform' },
-                timeout: 60000
-            };
+/**
+ * Rejestruje biometrię (WebAuthn).
+ * to jest implementacja Client-Side. Bez backendu
+ * nie jest to pełne zabezpieczenie kryptograficzne, a jedynie powiązanie credentiala z przeglądarką.
+ */
+export async function registerBiometrics() {
+    try {
+        const challenge = crypto.getRandomValues(new Uint8Array(32));
+        const pubKey = {
+            challenge,
+            rp: { name: 'FajneNotatki' },
+            user: {
+                id: crypto.getRandomValues(new Uint8Array(16)),
+                name: 'user@local',
+                displayName: 'Użytkownik'
+            },
+            pubKeyCredParams: [{ alg: -7, type: 'public-key' }],
+            authenticatorSelection: { authenticatorAttachment: 'platform' },
+            timeout: 60000
+        };
 
-            const cred = await navigator.credentials.create({ publicKey: pubKey });
+        const cred = await navigator.credentials.create({ publicKey: pubKey });
+        if (cred) {
+            localStorage.setItem(CRED_KEY, btoa(String.fromCharCode(...new Uint8Array(cred.rawId))));
+            return true;
+        }
+    } catch (e) {
+        console.error('Auth Register Error:', e);
+    }
+    return false;
+}
 
-            if (cred) {
-                // Konwersja rawId na format stringa bezpiecznego dla localStorage
-                localStorage.setItem(CRED_KEY, btoa(String.fromCharCode(...new Uint8Array(cred.rawId))));
-                return true;
+/**
+ * Logowanie biometryczne.
+ */
+export async function loginBiometrics() {
+    try {
+        const stored = localStorage.getItem(CRED_KEY);
+        if (!stored) return false;
+
+        const id = Uint8Array.from(atob(stored), c => c.charCodeAt(0));
+        const assertion = await navigator.credentials.get({
+            publicKey: {
+                challenge: new Uint8Array(32),
+                allowCredentials: [{ id, type: 'public-key' }]
             }
-        } catch (e) {
-            console.error('Auth Register Error:', e);
+        });
+
+        // W prawdziwej aplikacji nastąpiłaby weryfikacja podpisu na serwerze
+        if (assertion) {
+            setSession(true);
+            return true;
         }
-        return false;
+    } catch (e) {
+        console.warn('Biometrics check failed', e);
     }
+    return false;
+}
 
-    /**
-     * Weryfikuje tożsamość użytkownika przy użyciu zapisanej biometrii.
-     * Żąda podpisu cyfrowego dla challenge'a.
-     */
-    async function login() {
-        try {
-            const stored = localStorage.getItem(CRED_KEY);
-            if (!stored) return false;
+/**
+ * Zapisuje zahashowany PIN.
+ * @param {string} pin
+ */
+export async function setPin(pin) {
+    const hash = await hashPin(pin);
+    localStorage.setItem(PIN_KEY, hash);
+}
 
-            const id = Uint8Array.from(atob(stored), c => c.charCodeAt(0));
+/**
+ * Sprawdza poprawność PINu.
+ * @param {string} pin
+ */
+export async function checkPin(pin) {
+    const hash = await hashPin(pin);
+    const storedHash = localStorage.getItem(PIN_KEY);
+    const isValid = hash === storedHash;
+    if (isValid) setSession(true);
+    return isValid;
+}
 
-            const assertion = await navigator.credentials.get({
-                publicKey: {
-                    challenge: new Uint8Array(32),
-                    allowCredentials: [{ id, type: 'public-key' }]
-                }
-            });
+/**
+ * Ustawia flagę sesji (utrzymywaną do zamknięcia karty).
+ * @param {boolean} status 
+ */
+function setSession(status) {
+    if (status) sessionStorage.setItem(SESSION_KEY, '1');
+    else sessionStorage.removeItem(SESSION_KEY);
+}
 
-            return !!assertion;
-        } catch (e) {
-            return false;
-        }
-    }
+/**
+ * Sprawdza, czy użytkownik jest już zalogowany w tej sesji przeglądarki.
+ */
+export function isSessionActive() {
+    return sessionStorage.getItem(SESSION_KEY) === '1';
+}
 
-    /**
-     * Zapisuje kod PIN w pamięci lokalnej przeglądarki.
-     * @param {string} pin - Kod PIN do zapisania.
-     */
-    function setPin(pin) {
-        localStorage.setItem(PIN_KEY, pin);
-    }
+/**
+ * Sprawdza, czy użytkownik ma skonfigurowany PIN (czy to powracający user).
+ */
+export function hasAccount() {
+    return !!localStorage.getItem(PIN_KEY);
+}
 
-    /**
-     * Sprawdza zgodność podanego PINu z zapisanym wzorcem.
-     * @param {string} pin - Wprowadzony kod PIN.
-     * @returns {boolean}
-     */
-    function checkPin(pin) {
-        return localStorage.getItem(PIN_KEY) === pin;
-    }
-
-    return { register, login, setPin, checkPin };
-})();
+export function clearData() {
+    localStorage.removeItem(CRED_KEY);
+    localStorage.removeItem(PIN_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
+}

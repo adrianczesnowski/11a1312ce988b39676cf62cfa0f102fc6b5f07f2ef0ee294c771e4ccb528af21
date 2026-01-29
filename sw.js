@@ -16,6 +16,9 @@ const APP_SHELL_ASSETS = [
     "./js/db.js",
     "./js/auth.js",
     "./js/speech.js",
+    "./js/settings.js",
+    "./js/notes.js",
+    "./js/ui.js",
     "./assets/icon-192.png"
 ];
 
@@ -68,7 +71,7 @@ self.addEventListener("fetch", (event) => {
     // Ignorowanie domen zewnętrznych
     if (url.origin !== self.location.origin) return;
 
-    // Strategia dla nawigacji: Zawsze zwracaj index.html (SPA fallback)
+    // Strategia dla nawigacji: Zawsze zwraca index.html
     if (req.mode === "navigate") {
         event.respondWith(
             caches.match("./index.html").then((cached) => cached || fetch(req))

@@ -5,222 +5,111 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>FajneNotatki</title>
-    <meta name="theme-color" content="#0d6efd">
-    <link rel="manifest" href="manifest.json">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="apple-touch-icon" href="assets/icon-192.png">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="FajneNotatki">
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        body,
-        html {
-            height: 100%;
-        }
-
-        section {
-            min-height: 80vh;
-        }
-
-        #offline-indicator {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #dc3545;
-            color: white;
-            text-align: center;
-            padding: 8px;
-            z-index: 2000;
-            display: none;
-            font-size: 0.9rem;
-        }
-
-        .camera-wrapper {
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            display: none;
-            position: relative;
-        }
-
-        video {
-            width: 100%;
-            display: block;
-        }
-
-        .captured-image {
-            width: 100%;
-            border-radius: 8px;
-            margin-top: 10px;
-            display: block;
-            border: 1px solid #ddd;
-        }
-
-        .fab {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            font-size: 24px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            z-index: 100;
-        }
-    </style>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
 </head>
 
-<body class="bg-light">
+<body>
     <div id="offline-indicator">Brak połączenia z siecią.</div>
 
-    <div class="container py-3" style="max-width: 600px;">
-
-        <header class="d-flex align-items-center justify-content-between mb-3 sticky-top bg-light py-2"
-            style="z-index: 1000;">
-            <div class="d-flex align-items-center">
-                <img src="assets/icon-192.png" alt="logo" width="32" height="32" class="me-2 rounded">
-                <h1 class="h5 mb-0 fw-bold">FajneNotatki</h1>
+    <dialog id="app-modal">
+        <div class="card-header" id="modal-title">Komunikat</div>
+        <div class="modal-content">
+            <p id="modal-message"></p>
+            <div class="modal-actions">
+                <button id="btn-modal-cancel" class="btn outline hidden">Anuluj</button>
+                <button id="btn-modal-confirm" class="btn primary">OK</button>
             </div>
-            <div>
-                <button id="btn-go-settings" class="btn btn-sm btn-outline-dark d-none">Ustawienia</button>
-                <button id="btn-go-list" class="btn btn-sm btn-outline-secondary d-none">← Wróć</button>
+        </div>
+    </dialog>
+
+    <div class="container">
+        <header>
+            <h1><img src="assets/icon-192.png" width="24"> FajneNotatki</h1>
+            <div class="nav-buttons">
+                <button id="btn-go-settings" class="btn outline hidden">Ustawienia</button>
+                <button id="btn-go-list" class="btn outline hidden">← Wróć</button>
             </div>
         </header>
 
-        <section id="view-auth" class="d-flex flex-column justify-content-center align-items-center mt-3 pb-5">
+        <section id="view-auth" class="auth-section">
+            <div class="card" id="login-card">
+                <div class="card-header">WITAJ!</div>
+                <div class="text-center">
+                    <p class="text-muted">Zaloguj się, aby uzyskać dostęp</p>
+                    <button id="btn-auth-biometrics" class="btn primary full-width" style="margin-bottom: 10px;">Odcisk
+                        palca / Twarz</button>
+                    <button id="btn-auth-pin-login-show" class="btn outline full-width">Kod PIN</button>
 
-            <div class="text-center mb-4">
-                <img src="assets/icon-192.png" width="50" height="50" class="mb-2 rounded shadow-sm">
-                <h2 class="h4 fw-bold">FajneNotatki</h2>
-            </div>
-
-            <div class="card w-100 shadow-sm mb-4 border-primary" style="max-width: 400px;">
-                <div class="card-header bg-primary text-white text-center fw-bold">
-                    MAM JUŻ KONTO
-                </div>
-                <div class="card-body p-3 text-center">
-                    <p class="small text-muted mb-3">Wybierz metodę logowania:</p>
-                    <div class="d-grid gap-2">
-                        <button id="btn-auth-biometrics" class="btn btn-outline-primary">
-                            Odcisk palca / Twarz
-                        </button>
-                        <button id="btn-auth-pin-login-show" class="btn btn-outline-secondary">
-                            Kod PIN
-                        </button>
-                    </div>
-
-                    <div id="login-pin-area" class="mt-3 d-none bg-light p-2 rounded">
-                        <label class="small text-muted">Podaj PIN:</label>
+                    <div id="login-pin-area" class="hidden" style="margin-top: 15px;">
                         <input id="login-pin-input" type="password" inputmode="numeric"
-                            class="form-control text-center mb-2" placeholder="****">
-                        <button id="btn-auth-pin-submit" class="btn btn-primary w-100 btn-sm">Zaloguj</button>
+                            placeholder="Podaj PIN (4 cyfry)" class="text-center">
+                        <button id="btn-auth-pin-submit" class="btn primary full-width">Zatwierdź</button>
                     </div>
                 </div>
             </div>
 
-            <div class="position-relative w-100 text-center mb-4" style="max-width: 300px;">
-                <hr>
-                <span class="position-absolute top-50 start-50 translate-middle bg-light px-2 text-muted fw-bold"
-                    style="font-size: 0.8rem;">LUB UTWÓRZ NOWE</span>
-            </div>
-
-            <div class="card w-100 shadow-sm border-0 bg-white" style="max-width: 400px;">
-                <div class="card-body p-3">
-                    <h5 class="card-title text-center text-muted h6 mb-3">PIERWSZY RAZ TUTAJ?</h5>
-
-                    <div id="register-area">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">1. Ustaw Twój PIN)</label>
-                            <div class="input-group">
-                                <input id="register-pin-input" type="number" inputmode="numeric" class="form-control"
-                                    placeholder="Np. 1234">
-                                <button id="btn-register-pin-save" class="btn btn-secondary">Zapisz</button>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">2. Dodaj biometrię</label>
-                            <button id="btn-auth-register" class="btn btn-outline-info w-100 btn-sm">
-                                Kliknij, aby dodać odcisk palca
-                            </button>
-                        </div>
-
-                        <hr>
-
-                        <button id="btn-enter-app-fresh" class="btn btn-success w-100 py-3 fw-bold shadow-sm">
-                            WEJDŹ DO APLIKACJI
-                        </button>
+            <div class="card" id="register-card" style="margin-top: 20px;">
+                <h3 class="text-center" style="margin-bottom: 15px; font-size: 1rem;">Pierwszy raz tutaj?</h3>
+                <div id="register-area">
+                    <label class="text-muted">1. Ustaw Twój PIN</label>
+                    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                        <input id="register-pin-input" type="number" inputmode="numeric" placeholder="Np. 1234">
+                        <button id="btn-register-pin-save" class="btn outline">Zapisz</button>
                     </div>
+
+                    <label class="text-muted">2. Dodaj biometrię</label>
+                    <button id="btn-auth-register" class="btn outline full-width" style="margin-bottom: 15px;">Kliknij,
+                        aby dodać</button>
+
+                    <button id="btn-enter-app-fresh" class="btn success full-width">WEJDŹ DO APLIKACJI</button>
                 </div>
             </div>
         </section>
 
-        <section id="view-list" class="d-none">
-            <div class="mb-3">
-                <input id="search-input" class="form-control rounded-pill" placeholder="Szukaj notatek...">
-            </div>
-
-            <div id="install-alert"
-                class="alert alert-primary d-flex justify-content-between align-items-center d-none p-2">
-                <span class="small">Zainstaluj aplikację na telefonie!</span>
-                <button id="btn-install" class="btn btn-sm btn-light text-primary fw-bold">Instaluj</button>
-            </div>
-
-            <div id="notes-list-container" class="list-group shadow-sm mb-5">
-            </div>
-
-            <button id="btn-new-note"
-                class="btn btn-primary fab d-flex align-items-center justify-content-center">+</button>
+        <section id="view-list" class="hidden">
+            <input id="search-input" class="search-bar" placeholder="Szukaj notatek...">
+            <div id="notes-list-container"></div>
+            <button id="btn-new-note" class="fab">+</button>
         </section>
 
-        <section id="view-editor" class="d-none">
-            <div class="card shadow-sm p-3">
-                <input id="note-title" class="form-control fw-bold border-0 fs-4 px-0 mb-1" placeholder="Tytuł notatki">
-                <small id="note-date" class="text-muted d-block mb-3 small">Nowa notatka</small>
+        <section id="view-editor" class="hidden">
+            <div class="card">
+                <input id="note-title" placeholder="Tytuł notatki"
+                    style="font-weight: bold; font-size: 1.2rem; border: none; padding-left: 0;">
+                <small id="note-date" class="text-muted">Nowa notatka</small>
+                <textarea id="note-body" placeholder="Zacznij pisać..."></textarea>
 
-                <textarea id="note-body" class="form-control border-0 px-0 mb-3" rows="10"
-                    placeholder="Zacznij pisać..."></textarea>
+                <img id="note-image-preview" class="captured-image hidden">
 
-                <div class="mb-3">
-                    <img id="note-image-preview" class="captured-image d-none">
-                </div>
-
-                <div id="camera-interface" class="camera-wrapper mb-3 p-2">
+                <div id="camera-interface" class="camera-wrapper">
                     <video id="video-feed" autoplay playsinline></video>
-                    <button id="btn-take-photo" class="btn btn-light w-100 mt-2 fw-bold">Zrób zdjęcie</button>
+                    <button id="btn-take-photo" class="btn outline full-width" style="border-radius: 0;">Zrób
+                        zdjęcie</button>
                 </div>
 
-                <div class="border-top pt-3 d-flex gap-2 flex-wrap">
-                    <button id="btn-save" class="btn btn-primary flex-grow-1">Zapisz</button>
-                    <button id="btn-camera" class="btn btn-outline-dark">📷</button>
-                    <button id="btn-speech" class="btn btn-outline-secondary">🎤</button>
-                    <button id="btn-delete" class="btn btn-danger">🗑</button>
+                <div class="btn-group">
+                    <button id="btn-save" class="btn primary">Zapisz</button>
+                    <button id="btn-camera" class="btn outline icon">📷</button>
+                    <button id="btn-speech" class="btn outline icon">🎤</button>
+                    <button id="btn-delete" class="btn danger icon">🗑</button>
                 </div>
             </div>
-            <canvas id="camera-canvas" class="d-none"></canvas>
+            <canvas id="camera-canvas" class="hidden"></canvas>
         </section>
 
-        <section id="view-settings" class="d-none">
-            <div class="card p-4 shadow-sm">
-                <h3 class="h5 mb-3">Ustawienia</h3>
-                <button id="btn-full-reset" class="btn btn-outline-danger w-100"
-                    onclick="alert('To tylko atrapa funkcji czyszczenia.')">Usuń wszystkie dane</button>
+        <section id="view-settings" class="hidden">
+            <div class="card">
+                <h3 style="margin-bottom: 1rem;">Ustawienia</h3>
+                <button id="btn-full-reset" class="btn danger full-width">Usuń wszystkie dane</button>
             </div>
         </section>
-
     </div>
 
-    <script src="js/db.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/speech.js"></script>
-    <script src="js/app.js"></script>
+    <script type="module" src="js/app.js"></script>
     <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
-                .then(() => console.log('SW Registered'))
-                .catch(console.error);
-        }
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
     </script>
 </body>
 

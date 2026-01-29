@@ -1,69 +1,67 @@
-const Speech = (() => {
-    // Obsługa prefiksów dla różnych przeglądarek (Chrome, Safari, etc.)
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+/**
+ * Moduł obsługi Web Speech API (Rozpoznawanie mowy).
+ * Dostarcza interfejs do sterowania mikrofonem i przetwarzania mowy na tekst.
+ */
 
-    let rec = null;
-    let onResultCallback, onErrorCallback, onEndCallback;
+// Obsługa prefiksów przeglądarek (Chrome, Safari, Edge)
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+let rec = null;
 
-    /**
-     * Sprawdza dostępność API SpeechRecognition w przeglądarce.
-     * @returns {boolean}
-     */
-    function available() {
-        return !!SpeechRecognition;
+/**
+ * Sprawdza, czy przeglądarka obsługuje rozpoznawanie mowy.
+ * @returns {boolean} True, jeśli API jest dostępne.
+ */
+export function available() {
+    return !!SpeechRecognition;
+}
+
+/**
+ * Uruchamia nasłuchiwanie i rozpoznawanie mowy.
+ * * @param {function(string): void} onResult - Callback wywoływany po pomyślnym rozpoznaniu fragmentu tekstu. Otrzymuje tekst jako argument.
+ * @param {function(Error): void} [onError] - Opcjonalny callback wywoływany w przypadku błędu API.
+ * @param {function(): void} [onEnd] - Opcjonalny callback wywoływany po zakończeniu sesji nagrywania (automatycznym lub ręcznym).
+ */
+export function start(onResult, onError, onEnd) {
+    if (!available()) {
+        if (onError) onError(new Error('SpeechRecognition not available'));
+        return;
     }
 
-    /**
-     * Inicjuje i uruchamia nasłuchiwanie.
-     * @param {Function} onResult - Callback wywoływany po rozpoznaniu tekstu.
-     * @param {Function} onError - Callback błędów.
-     * @param {Function} onEnd - Callback wywoływany po zakończeniu sesji nagrywania.
-     */
-    function start(onResult, onError, onEnd) {
-        if (!available()) {
-            if (onError) onError(new Error('SpeechRecognition not available'));
-            return;
-        }
+    rec = new SpeechRecognition();
+    rec.lang = 'pl-PL';
+    rec.interimResults = false; // Zwracaj tylko sfinalizowane wyniki
+    rec.maxAlternatives = 1;
 
-        onResultCallback = onResult;
-        onErrorCallback = onError;
-        onEndCallback = onEnd;
-
-        rec = new SpeechRecognition();
-        rec.lang = 'pl-PL';
-        rec.interimResults = false; // Zwracamy tylko finalne wyniki
-        rec.maxAlternatives = 1;
-
-        rec.onresult = (e) => {
+    rec.onresult = (e) => {
+        if (e.results.length > 0) {
             const transcript = e.results[e.results.length - 1][0].transcript.trim();
-            if (onResultCallback) onResultCallback(transcript);
-        };
-
-        rec.onerror = (e) => {
-            console.error('Speech API Error:', e);
-            if (onErrorCallback) onErrorCallback(e);
-        };
-
-        rec.onend = () => {
-            if (onEndCallback) onEndCallback();
-        };
-
-        try {
-            rec.start();
-        } catch (e) {
-            console.warn('Speech recognition start failed', e);
+            if (onResult) onResult(transcript);
         }
-    }
+    };
 
-    /**
-     * Przerywa aktywne nasłuchiwanie.
-     */
-    function stop() {
-        if (rec) {
-            rec.stop();
-            rec = null;
-        }
-    }
+    rec.onerror = (e) => {
+        console.error('Speech API Error:', e);
+        if (onError) onError(e);
+    };
 
-    return { available, start, stop };
-})();
+    rec.onend = () => {
+        if (onEnd) onEnd();
+    };
+
+    try {
+        rec.start();
+    } catch (e) {
+        console.warn('Speech start error', e);
+    }
+}
+
+/**
+ * Zatrzymuje aktywne nasłuchiwanie.
+ * Wywołanie tej metody spowoduje wyzwolenie zdarzenia `onend`.
+ */
+export function stop() {
+    if (rec) {
+        rec.stop();
+        rec = null;
+    }
+}
