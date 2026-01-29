@@ -1,6 +1,6 @@
 const DB_NAME = 'secure-notes';
 const STORE_NAME = 'notes';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 /**
  * Otwiera połączenie z bazą IndexedDB.
