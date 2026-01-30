@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>FajneNotatki</title>
+    <title>Notatki z Podróży</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2563eb">
@@ -14,7 +14,9 @@
     <div id="offline-indicator">Brak połączenia z siecią.</div>
 
     <dialog id="app-modal">
-        <div class="card-header" id="modal-title">Komunikat</div>
+        <div class="card-header"
+            style="background: var(--primary); color: white; padding: 10px; text-align: center; font-weight: bold;"
+            id="modal-title">Komunikat</div>
         <div class="modal-content">
             <p id="modal-message"></p>
             <div class="modal-actions">
@@ -26,47 +28,12 @@
 
     <div class="container">
         <header>
-            <h1><img src="assets/icon-192.png" width="24"> FajneNotatki</h1>
+            <h1><img src="assets/icon-192.png" width="24" style="border-radius: 4px;">Podróżnik</h1>
             <div class="nav-buttons">
                 <button id="btn-go-settings" class="btn outline hidden">Ustawienia</button>
                 <button id="btn-go-list" class="btn outline hidden">← Wróć</button>
             </div>
         </header>
-
-        <section id="view-auth" class="auth-section">
-            <div class="card" id="login-card">
-                <div class="card-header">WITAJ!</div>
-                <div class="text-center">
-                    <p class="text-muted">Zaloguj się, aby uzyskać dostęp</p>
-                    <button id="btn-auth-biometrics" class="btn primary full-width" style="margin-bottom: 10px;">Odcisk
-                        palca / Twarz</button>
-                    <button id="btn-auth-pin-login-show" class="btn outline full-width">Kod PIN</button>
-
-                    <div id="login-pin-area" class="hidden" style="margin-top: 15px;">
-                        <input id="login-pin-input" type="password" inputmode="numeric"
-                            placeholder="Podaj PIN (4 cyfry)" class="text-center">
-                        <button id="btn-auth-pin-submit" class="btn primary full-width">Zatwierdź</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" id="register-card" style="margin-top: 20px;">
-                <h3 class="text-center" style="margin-bottom: 15px; font-size: 1rem;">Pierwszy raz tutaj?</h3>
-                <div id="register-area">
-                    <label class="text-muted">1. Ustaw Twój PIN</label>
-                    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                        <input id="register-pin-input" type="number" inputmode="numeric" placeholder="Np. 1234">
-                        <button id="btn-register-pin-save" class="btn outline">Zapisz</button>
-                    </div>
-
-                    <label class="text-muted">2. Dodaj biometrię</label>
-                    <button id="btn-auth-register" class="btn outline full-width" style="margin-bottom: 15px;">Kliknij,
-                        aby dodać</button>
-
-                    <button id="btn-enter-app-fresh" class="btn success full-width">WEJDŹ DO APLIKACJI</button>
-                </div>
-            </div>
-        </section>
 
         <section id="view-list" class="hidden">
             <input id="search-input" class="search-bar" placeholder="Szukaj notatek...">
@@ -76,23 +43,29 @@
 
         <section id="view-editor" class="hidden">
             <div class="card">
-                <input id="note-title" placeholder="Tytuł notatki"
-                    style="font-weight: bold; font-size: 1.2rem; border: none; padding-left: 0;">
-                <small id="note-date" class="text-muted">Nowa notatka</small>
-                <textarea id="note-body" placeholder="Zacznij pisać..."></textarea>
+                <input id="note-title" placeholder="Tytuł miejsca...">
+                <small id="note-date" class="text-muted" style="display:block; margin-bottom: 5px;">Nowa notatka</small>
+
+                <div id="geo-preview" class="hidden">
+                    <span>Lokalizacja zapisana</span>
+                    <button id="btn-remove-geo" title="Usuń lokalizację">×</button>
+                </div>
+
+                <textarea id="note-body" placeholder="Opisz swoje wrażenia..."></textarea>
 
                 <img id="note-image-preview" class="captured-image hidden">
 
                 <div id="camera-interface" class="camera-wrapper">
                     <video id="video-feed" autoplay playsinline></video>
-                    <button id="btn-take-photo" class="btn outline full-width" style="border-radius: 0;">Zrób
-                        zdjęcie</button>
+                    <button id="btn-take-photo" class="btn outline full-width"
+                        style="border-radius: 0; background: white;">Zrób zdjęcie</button>
                 </div>
 
                 <div class="btn-group">
-                    <button id="btn-save" class="btn primary">Zapisz</button>
+                    <button id="btn-save" class="btn primary" style="flex-grow: 2;">Zapisz</button>
                     <button id="btn-camera" class="btn outline icon">📷</button>
                     <button id="btn-speech" class="btn outline icon">🎤</button>
+                    <button id="btn-geo" class="btn outline icon">📍</button>
                     <button id="btn-delete" class="btn danger icon">🗑</button>
                 </div>
             </div>
@@ -102,7 +75,8 @@
         <section id="view-settings" class="hidden">
             <div class="card">
                 <h3 style="margin-bottom: 1rem;">Ustawienia</h3>
-                <button id="btn-full-reset" class="btn danger full-width">Usuń wszystkie dane</button>
+                <p class="text-muted" style="margin-bottom: 20px;">Zarządzaj danymi aplikacji.</p>
+                <button id="btn-full-reset" class="btn danger full-width">Usuń wszystkie notatki</button>
             </div>
         </section>
     </div>
