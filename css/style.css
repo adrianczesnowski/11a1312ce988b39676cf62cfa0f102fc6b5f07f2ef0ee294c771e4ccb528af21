@@ -5,10 +5,7 @@
     --primary: #2563eb;
     --primary-hover: #1d4ed8;
     --primary-light: #eff6ff;
-
     --danger: #dc2626;
-    --danger-hover: #b91c1c;
-
     --success: #16a34a;
 
     --bg-app: #f3f4f6;
@@ -18,9 +15,7 @@
     --border-color: #e5e7eb;
 
     --radius: 12px;
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    --transition: all 0.2s ease-in-out;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 * {
@@ -37,7 +32,6 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    font-size: 16px;
 }
 
 /* =========================================
@@ -53,7 +47,6 @@ body {
     flex-direction: column;
 }
 
-/* Header */
 header {
     display: flex;
     justify-content: space-between;
@@ -69,21 +62,9 @@ header {
 header h1 {
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--text-main);
     display: flex;
     align-items: center;
     gap: 0.5rem;
-}
-
-header img {
-    border-radius: 6px;
-}
-
-/* Sekcje widoków */
-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
 }
 
 .hidden {
@@ -113,52 +94,41 @@ section {
     text-align: center;
     padding: 8px;
     font-size: 0.8rem;
-    font-weight: 600;
-    z-index: 2000;
     display: none;
+    z-index: 2000;
 }
 
 /* =========================================
    3. KOMPONENTY UI
    ========================================= */
 
-/* Karty */
 .card {
     background: var(--bg-card);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    overflow: hidden;
+    padding: 1.5rem;
     margin-bottom: 1rem;
     border: 1px solid var(--border-color);
 }
 
-.card-header {
-    background-color: var(--primary);
-    color: white;
-    padding: 1rem;
-    font-weight: 600;
-    text-align: center;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    letter-spacing: 0.05em;
-}
-
-.card>div:not(.card-header) {
-    padding: 1.5rem;
-}
-
-/* Pola formularzy */
 input,
 textarea {
     width: 100%;
-    padding: 12px 16px;
+    padding: 12px;
     border: 2px solid var(--border-color);
     border-radius: 8px;
     font-size: 1rem;
     background: #f9fafb;
-    transition: var(--transition);
     margin-bottom: 1rem;
     font-family: inherit;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
 }
 
 textarea {
@@ -167,15 +137,6 @@ textarea {
     max-height: 60vh;
 }
 
-input:focus,
-textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: white;
-    box-shadow: 0 0 0 3px var(--primary-light);
-}
-
-/* Przyciski */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -183,12 +144,10 @@ textarea:focus {
     padding: 12px 20px;
     border-radius: 8px;
     font-weight: 600;
-    font-size: 0.95rem;
     cursor: pointer;
-    transition: var(--transition);
     border: none;
     gap: 8px;
-    user-select: none;
+    transition: 0.2s;
 }
 
 .btn:active {
@@ -200,10 +159,6 @@ textarea:focus {
     color: white;
 }
 
-.btn.primary:hover {
-    background-color: var(--primary-hover);
-}
-
 .btn.outline {
     background-color: transparent;
     border: 2px solid var(--border-color);
@@ -211,7 +166,6 @@ textarea:focus {
 }
 
 .btn.outline:hover {
-    border-color: var(--text-muted);
     background-color: #f3f4f6;
 }
 
@@ -220,19 +174,11 @@ textarea:focus {
     color: white;
 }
 
-.btn.danger:hover {
-    background-color: var(--danger-hover);
-}
-
-.btn.success {
-    background-color: var(--success);
-    color: white;
-}
-
 .btn-group {
     display: flex;
     gap: 10px;
     margin-top: auto;
+    flex-wrap: wrap;
 }
 
 .btn.icon {
@@ -245,14 +191,11 @@ textarea:focus {
 }
 
 /* =========================================
-   4. MODUŁ: LISTA NOTATEK
+   4. LISTA NOTATEK
    ========================================= */
-
 .search-bar {
     border-radius: 50px;
     padding-left: 20px;
-    border-color: transparent;
-    box-shadow: var(--shadow);
 }
 
 .note-item {
@@ -260,38 +203,42 @@ textarea:focus {
     padding: 1rem;
     border-radius: var(--radius);
     margin-bottom: 0.75rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     border-left: 4px solid var(--primary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: transform 0.1s;
 }
 
 .note-item:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow);
 }
 
 .note-header {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 0.5rem;
-}
-
-.note-header span:first-child {
     font-weight: 700;
-    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
 }
 
 .note-preview {
     color: var(--text-muted);
-    font-size: 0.9rem;
-    line-height: 1.4;
     display: -webkit-box;
-    line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+.map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--primary);
+    text-decoration: none;
+    background: var(--primary-light);
+    padding: 4px 8px;
+    border-radius: 6px;
 }
 
 .fab {
@@ -311,49 +258,24 @@ textarea:focus {
     align-items: center;
     justify-content: center;
     z-index: 100;
-    transition: transform 0.2s;
-}
-
-.fab:active {
-    transform: scale(0.9) rotate(90deg);
 }
 
 /* =========================================
-   5. MODUŁ: EDYTOR I MEDIA
+   5. EDYTOR (KAMERA, GEO)
    ========================================= */
 
 #note-title {
-    background: transparent;
     border: none;
+    background: transparent;
     font-size: 1.5rem;
     font-weight: 800;
     padding: 0;
-    margin-bottom: 0.25rem;
-    border-radius: 0;
-}
-
-#note-title:focus {
-    box-shadow: none;
-}
-
-#note-date {
-    display: block;
-    margin-bottom: 1rem;
-    font-size: 0.8rem;
 }
 
 #note-body {
-    background: transparent;
     border: none;
-    resize: none;
-    min-height: 40vh;
+    background: transparent;
     padding: 0;
-    font-size: 1.1rem;
-    line-height: 1.6;
-}
-
-#note-body:focus {
-    box-shadow: none;
 }
 
 .camera-wrapper {
@@ -362,11 +284,11 @@ textarea:focus {
     overflow: hidden;
     margin-bottom: 1rem;
     position: relative;
+    display: none;
 }
 
 video {
     width: 100%;
-    height: auto;
     display: block;
 }
 
@@ -376,85 +298,6 @@ video {
     border: 1px solid var(--border-color);
     margin-bottom: 1rem;
     display: block;
-}
-
-/* =========================================
-   6. MODAL (DIALOG)
-   ========================================= */
-
-dialog {
-    border: none;
-    border-radius: var(--radius);
-    padding: 0;
-    box-shadow: var(--shadow-lg);
-    width: 90%;
-    max-width: 400px;
-    margin: auto;
-    background: white;
-    animation: fadeIn 0.2s ease-out;
-}
-
-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(2px);
-}
-
-.modal-content {
-    padding: 1.5rem;
-    text-align: center;
-}
-
-#modal-title {
-    border-radius: 0;
-    margin: 0;
-}
-
-#modal-message {
-    margin-bottom: 1.5rem;
-    font-size: 1.05rem;
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-.modal-actions .btn {
-    min-width: 80px;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* =========================================
-   7. RWD (Responsive)
-   ========================================= */
-
-@media (max-width: 400px) {
-    .btn-group {
-        flex-wrap: wrap;
-    }
-
-    .btn#btn-save {
-        width: 100%;
-        order: -1;
-        margin-bottom: 5px;
-    }
-
-    .btn.icon {
-        flex: 1;
-        border-radius: 8px;
-    }
 }
 
 #geo-preview {
@@ -479,7 +322,7 @@ dialog::backdrop {
     cursor: pointer;
     font-size: 1.1rem;
     line-height: 1;
-    font-family: Arial, sans-serif;
+    font-family: Arial, sans-serif; 
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -492,4 +335,34 @@ dialog::backdrop {
 
 #btn-remove-geo:hover {
     background: rgba(220, 38, 38, 0.1);
+}
+
+/* =========================================
+   6. MODAL (DIALOG)
+   ========================================= */
+dialog {
+    border: none;
+    border-radius: var(--radius);
+    padding: 0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 400px;
+    margin: auto;
+}
+
+dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+.modal-content {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 1.5rem;
 }

@@ -111,14 +111,21 @@ export async function openEditor(id = null) {
 
 // Zarządza przyciskiem Geo i podglądem
 function updateGeoUI(hasGeo) {
-    if (hasGeo) {
+    if (hasGeo && currentGeo) {
         UI.editor.geoPreview.classList.remove('hidden');
         UI.editor.btnGeo.classList.add('primary');
         UI.editor.btnGeo.classList.remove('outline');
+
+        const lat = currentGeo.lat.toFixed(4);
+        const lon = currentGeo.lon.toFixed(4);
+        UI.editor.geoText.textContent = `📍 ${lat}, ${lon}`;
+
     } else {
         UI.editor.geoPreview.classList.add('hidden');
         UI.editor.btnGeo.classList.remove('primary');
         UI.editor.btnGeo.classList.add('outline');
+
+        UI.editor.geoText.textContent = '📍 Lokalizacja';
     }
 }
 

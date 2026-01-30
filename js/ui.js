@@ -21,6 +21,7 @@ export const UI = {
         btnGeo: document.getElementById('btn-geo'),
 
         geoPreview: document.getElementById('geo-preview'),
+        geoText: document.getElementById('geo-text'),
         btnRemoveGeo: document.getElementById('btn-remove-geo')
     },
     list: {
