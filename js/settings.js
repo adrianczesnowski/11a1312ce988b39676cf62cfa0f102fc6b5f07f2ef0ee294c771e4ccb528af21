@@ -3,7 +3,7 @@ import * as DB from './db.js';
 
 /**
  * Wykonuje pełny reset aplikacji.
- * Usuwa bazę danych, Auth i przeładowuje stronę.
+ * Usuwa bazę danych i przeładowuje stronę.
  */
 export async function performFullReset() {
     const confirmed = await showModal('Reset', 'Czy usunąć WSZYSTKIE dane? Operacja nieodwracalna.', true);
@@ -11,7 +11,6 @@ export async function performFullReset() {
     if (confirmed) {
         try {
             await DB.clearAll();
-            Auth.clearData();
             window.location.reload();
         } catch (e) {
             console.error(e);
