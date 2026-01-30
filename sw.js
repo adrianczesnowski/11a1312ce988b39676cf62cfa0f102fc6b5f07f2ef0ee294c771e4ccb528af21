@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v27";
+const CACHE_VERSION = "v28";
 const APP_CACHE_NAME = `travel-notes-${CACHE_VERSION}`;
 
 // Lista plików do zapisania w pamięci urządzenia
@@ -14,7 +14,9 @@ const ASSETS_TO_CACHE = [
     "./js/settings.js",
     "./js/db.js",
     "./js/speech.js",
-    "./assets/icon-192.png"
+    "./assets/icon-192.png",
+    "./assets/icon-256.png",
+    "./assets/icon-512.png"
 ];
 
 // 1. INSTALACJA: Pobierz i zapisz pliki
