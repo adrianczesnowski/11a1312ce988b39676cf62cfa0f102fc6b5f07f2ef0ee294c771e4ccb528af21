@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v30-repair";
+const CACHE_VERSION = "v31";
 const APP_CACHE_NAME = `travel-notes-${CACHE_VERSION}`;
 
 const ASSETS_TO_CACHE = [

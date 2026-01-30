@@ -1,6 +1,5 @@
 import { showModal } from './ui.js';
 import * as DB from './db.js';
-import * as Auth from './auth.js';
 
 /**
  * Wykonuje pełny reset aplikacji.
