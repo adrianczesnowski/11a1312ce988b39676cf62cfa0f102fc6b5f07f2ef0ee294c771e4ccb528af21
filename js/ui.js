@@ -1,5 +1,5 @@
 /**
- * Moduł zarządzający DOM i widokami.
+ * Moduł zarządzający referencjami do elementów DOM i widokami.
  */
 export const UI = {
     views: {
@@ -10,16 +10,24 @@ export const UI = {
     editor: {
         title: document.getElementById('note-title'),
         body: document.getElementById('note-body'),
+
+        // Obsługa zdjęć
+        imgContainer: document.getElementById('image-preview-container'),
         imgPreview: document.getElementById('note-image-preview'),
+        btnRemoveImage: document.getElementById('btn-remove-image'),
+
+        // Kamera
         camInterface: document.getElementById('camera-interface'),
         video: document.getElementById('video-feed'),
         canvas: document.getElementById('camera-canvas'),
         date: document.getElementById('note-date'),
 
+        // Przyciski edytora
         btnSpeech: document.getElementById('btn-speech'),
         btnCamera: document.getElementById('btn-camera'),
         btnGeo: document.getElementById('btn-geo'),
 
+        // Geolokalizacja
         geoPreview: document.getElementById('geo-preview'),
         geoText: document.getElementById('geo-text'),
         btnRemoveGeo: document.getElementById('btn-remove-geo')
@@ -40,6 +48,11 @@ export const UI = {
     }
 };
 
+/**
+ * Przełącza widoczność widoków aplikacji.
+ * @param {string} viewName - ID widoku do pokazania.
+ * @param {Function} [onExitCallback] - Funkcja wywoływana przy zmianie widoku.
+ */
 export function showView(viewName, onExitCallback = null) {
     Object.values(UI.views).forEach(el => el.classList.add('hidden'));
     if (UI.views[viewName]) UI.views[viewName].classList.remove('hidden');
@@ -50,6 +63,13 @@ export function showView(viewName, onExitCallback = null) {
     if (onExitCallback) onExitCallback();
 }
 
+/**
+ * Wyświetla modal systemowy.
+ * @param {string} title - Tytuł modala.
+ * @param {string} message - Treść wiadomości.
+ * @param {boolean} [isConfirm=false] - Czy wyświetlić przycisk Anuluj.
+ * @returns {Promise<boolean>}
+ */
 export function showModal(title, message, isConfirm = false) {
     return new Promise((resolve) => {
         UI.common.modalTitle.innerText = title;
@@ -74,6 +94,11 @@ export function showModal(title, message, isConfirm = false) {
     });
 }
 
+/**
+ * Dodaje nasłuchiwacz zdarzenia click dla elementu o danym ID.
+ * @param {string} id - ID elementu DOM.
+ * @param {Function} handler - Funkcja obsługująca zdarzenie.
+ */
 export function addClick(id, handler) {
     const el = document.getElementById(id);
     if (el) el.addEventListener('click', handler);

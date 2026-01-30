@@ -6,19 +6,15 @@ import * as Speech from './speech.js';
 let cameraStream = null;
 let isListening = false;
 
-// ==========================================
-// START APLIKACJI
-// ==========================================
+/**
+ * Inicjalizacja aplikacji.
+ */
 function init() {
     showView('list', stopCamera);
     Notes.loadNotes();
 }
 
-// ==========================================
-// OBSŁUGA ZDARZEŃ
-// ==========================================
-
-// Nawigacja i Notatki
+// Obsługa przycisków nawigacji i edytora
 addClick('btn-new-note', () => Notes.openEditor());
 addClick('btn-save', Notes.saveNote);
 addClick('btn-delete', Notes.deleteCurrentNote);
@@ -26,14 +22,17 @@ addClick('btn-go-settings', () => showView('settings', stopCamera));
 addClick('btn-go-list', () => { showView('list', stopCamera); Notes.loadNotes(); });
 addClick('btn-full-reset', Settings.performFullReset);
 
-// --- GEOLOKALIZACJA ---
+// Obsługa usuwania zdjęcia
+addClick('btn-remove-image', Notes.removeImage);
+
+// Obsługa geolokalizacji
 addClick('btn-geo', Notes.toggleGeo);
 addClick('btn-remove-geo', (e) => {
     e.stopPropagation();
     Notes.toggleGeo();
 });
 
-// --- KAMERA ---
+// Obsługa kamery
 addClick('btn-camera', async () => {
     try {
         UI.editor.camInterface.style.display = 'block';
@@ -54,10 +53,13 @@ addClick('btn-take-photo', () => {
     c.getContext('2d').drawImage(v, 0, 0);
 
     UI.editor.imgPreview.src = c.toDataURL('image/jpeg', 0.7);
-    UI.editor.imgPreview.classList.remove('hidden');
+    UI.editor.imgContainer.classList.remove('hidden');
     stopCamera();
 });
 
+/**
+ * Zatrzymuje strumień wideo i ukrywa interfejs kamery.
+ */
 function stopCamera() {
     if (cameraStream) {
         cameraStream.getTracks().forEach(t => t.stop());
@@ -67,7 +69,7 @@ function stopCamera() {
     UI.editor.btnCamera.classList.remove('hidden');
 }
 
-// --- MOWA ---
+// Obsługa mowy
 addClick('btn-speech', () => {
     if (!Speech.available()) return showModal('Info', 'Brak obsługi mowy.');
 

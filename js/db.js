@@ -1,8 +1,11 @@
 const DB_NAME = 'travel-notes-db';
 const STORE_NAME = 'notes';
-const DB_VERSION = 12;
+const DB_VERSION = 1;
 
-// Funkcja otwierająca połączenie z bazą danych
+/**
+ * Otwiera połączenie z bazą IndexedDB.
+ * @returns {Promise<IDBDatabase>}
+ */
 function openDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -17,7 +20,11 @@ function openDB() {
     });
 }
 
-// Dodawanie lub aktualizowanie notatki
+/**
+ * Zapisuje nową notatkę lub aktualizuje istniejącą.
+ * @param {Object} note - Obiekt notatki do zapisania.
+ * @returns {Promise<boolean>}
+ */
 export async function addNote(note) {
     const db = await openDB();
     return new Promise((resolve, reject) => {
@@ -29,7 +36,10 @@ export async function addNote(note) {
     });
 }
 
-// Pobieranie wszystkich notatek
+/**
+ * Pobiera wszystkie notatki z bazy.
+ * @returns {Promise<Array>}
+ */
 export async function getAll() {
     const db = await openDB();
     return new Promise((resolve, reject) => {
@@ -41,7 +51,11 @@ export async function getAll() {
     });
 }
 
-// Pobieranie notatki po ID
+/**
+ * Pobiera pojedynczą notatkę na podstawie ID.
+ * @param {string} id - Identyfikator notatki.
+ * @returns {Promise<Object>}
+ */
 export async function getNote(id) {
     const db = await openDB();
     return new Promise((resolve, reject) => {
@@ -53,24 +67,31 @@ export async function getNote(id) {
     });
 }
 
-// Usuwanie notatki po ID
+/**
+ * Usuwa notatkę z bazy danych.
+ * @param {string} id - Identyfikator notatki do usunięcia.
+ * @returns {Promise<boolean>}
+ */
 export async function deleteNote(id) {
     const db = await openDB();
     return new Promise((resolve, reject) => {
         const tx = db.transaction(STORE_NAME, 'readwrite');
-        store = tx.objectStore(STORE_NAME);
+        const store = tx.objectStore(STORE_NAME);
         store.delete(id);
         tx.oncomplete = () => resolve(true);
         tx.onerror = () => reject(tx.error);
     });
 }
 
-// Czyszczenie całej bazy danych
+/**
+ * Usuwa wszystkie notatki z bazy (czyszczenie).
+ * @returns {Promise<boolean>}
+ */
 export async function clearAll() {
     const db = await openDB();
     return new Promise((resolve, reject) => {
         const tx = db.transaction(STORE_NAME, 'readwrite');
-        store = tx.objectStore(STORE_NAME);
+        const store = tx.objectStore(STORE_NAME);
         store.clear();
         tx.oncomplete = () => resolve(true);
         tx.onerror = () => reject(tx.error);

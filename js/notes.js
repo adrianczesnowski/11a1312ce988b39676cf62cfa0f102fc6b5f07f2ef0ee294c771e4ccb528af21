@@ -5,11 +5,18 @@ import * as Geo from './geo.js';
 let currentNoteId = null;
 let currentGeo = null;
 
+/**
+ * Pobiera notatki z bazy i odświeża listę.
+ */
 export async function loadNotes() {
     const notes = await DB.getAll();
     renderList(notes);
 }
 
+/**
+ * Renderuje listę notatek w DOM.
+ * @param {Array} notes - Tablica obiektów notatek.
+ */
 function renderList(notes) {
     UI.list.container.innerHTML = '';
 
@@ -71,7 +78,10 @@ function renderList(notes) {
     });
 }
 
-// Otwieranie edytora (nowa lub istniejąca notatka)
+/**
+ * Otwiera edytor dla nowej lub istniejącej notatki.
+ * @param {string|null} id - ID notatki do edycji lub null dla nowej.
+ */
 export async function openEditor(id = null) {
     currentNoteId = id;
     currentGeo = null;
@@ -79,7 +89,7 @@ export async function openEditor(id = null) {
     UI.editor.title.value = '';
     UI.editor.body.value = '';
     UI.editor.imgPreview.src = '';
-    UI.editor.imgPreview.classList.add('hidden');
+    UI.editor.imgContainer.classList.add('hidden');
     UI.editor.date.textContent = 'Nowa notatka';
 
     if (id) {
@@ -92,10 +102,9 @@ export async function openEditor(id = null) {
 
         if (n.image) {
             UI.editor.imgPreview.src = n.image;
-            UI.editor.imgPreview.classList.remove('hidden');
+            UI.editor.imgContainer.classList.remove('hidden');
         }
 
-        // Ładowanie lokalizacji
         if (n.geo) {
             currentGeo = n.geo;
             updateGeoUI(true);
@@ -109,7 +118,10 @@ export async function openEditor(id = null) {
     showView('editor');
 }
 
-// Zarządza przyciskiem Geo i podglądem
+/**
+ * Aktualizuje widoczność i treść widgetu lokalizacji.
+ * @param {boolean} hasGeo - Czy lokalizacja jest dostępna.
+ */
 function updateGeoUI(hasGeo) {
     if (hasGeo && currentGeo) {
         UI.editor.geoPreview.classList.remove('hidden');
@@ -124,12 +136,13 @@ function updateGeoUI(hasGeo) {
         UI.editor.geoPreview.classList.add('hidden');
         UI.editor.btnGeo.classList.remove('primary');
         UI.editor.btnGeo.classList.add('outline');
-
         UI.editor.geoText.textContent = '📍 Lokalizacja';
     }
 }
 
-//Logika przycisku Geo
+/**
+ * Przełącza stan lokalizacji (dodaje/usuwa).
+ */
 export async function toggleGeo() {
     if (currentGeo) {
         currentGeo = null;
@@ -154,11 +167,21 @@ export async function toggleGeo() {
     }
 }
 
-// Zapisywanie notatki
+/**
+ * Usuwa zdjęcie z aktualnie edytowanej notatki.
+ */
+export function removeImage() {
+    UI.editor.imgPreview.src = '';
+    UI.editor.imgContainer.classList.add('hidden');
+}
+
+/**
+ * Zapisuje aktualną notatkę do bazy.
+ */
 export async function saveNote() {
     const title = UI.editor.title.value.trim();
     const body = UI.editor.body.value.trim();
-    const hasImage = !UI.editor.imgPreview.classList.contains('hidden');
+    const hasImage = !UI.editor.imgContainer.classList.contains('hidden');
 
     if (!title && !body && !hasImage) {
         showView('list');
@@ -183,7 +206,9 @@ export async function saveNote() {
     }
 }
 
-// Usuwanie notatki
+/**
+ * Usuwa aktualnie edytowaną notatkę.
+ */
 export async function deleteCurrentNote() {
     if (!currentNoteId) {
         showView('list');

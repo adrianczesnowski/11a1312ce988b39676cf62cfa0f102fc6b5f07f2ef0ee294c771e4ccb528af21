@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="pl">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -8,11 +9,14 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2563eb">
 </head>
+
 <body>
     <div id="offline-indicator">Brak połączenia z siecią.</div>
 
     <dialog id="app-modal">
-        <div class="card-header" style="background: var(--primary); color: white; padding: 10px; text-align: center; font-weight: bold;" id="modal-title">Komunikat</div>
+        <div class="card-header"
+            style="background: var(--primary); color: white; padding: 10px; text-align: center; font-weight: bold;"
+            id="modal-title">Komunikat</div>
         <div class="modal-content">
             <p id="modal-message"></p>
             <div class="modal-actions">
@@ -41,17 +45,24 @@
             <div class="card">
                 <input id="note-title" placeholder="Tytuł miejsca...">
                 <small id="note-date" class="text-muted" style="display:block; margin-bottom: 5px;">Nowa notatka</small>
-                
+
                 <div id="geo-preview" class="hidden">
-                    <span id="geo-text">📍 Lokalizacja</span> <button id="btn-remove-geo" title="Usuń lokalizację">&times;</button> </div>
+                    <span id="geo-text">📍 Lokalizacja</span>
+                    <button id="btn-remove-geo" title="Usuń lokalizację">&times;</button>
+                </div>
 
                 <textarea id="note-body" placeholder="Opisz swoje wrażenia..."></textarea>
-                
-                <img id="note-image-preview" class="captured-image hidden">
-                
+
+                <div id="image-preview-container" class="hidden" style="margin-bottom: 1rem;">
+                    <img id="note-image-preview" class="captured-image">
+                    <button id="btn-remove-image" class="btn outline danger full-width"
+                        style="margin-top: 5px; padding: 8px;">Usuń zdjęcie</button>
+                </div>
+
                 <div id="camera-interface" class="camera-wrapper">
                     <video id="video-feed" autoplay playsinline></video>
-                    <button id="btn-take-photo" class="btn outline full-width" style="border-radius: 0; background: white;">Zrób zdjęcie</button>
+                    <button id="btn-take-photo" class="btn outline full-width"
+                        style="border-radius: 0; background: white;">Zrób zdjęcie</button>
                 </div>
 
                 <div class="btn-group">
@@ -79,4 +90,5 @@
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
     </script>
 </body>
+
 </html>
