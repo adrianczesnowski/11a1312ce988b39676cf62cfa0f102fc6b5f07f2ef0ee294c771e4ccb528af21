@@ -53,13 +53,10 @@ addClick('btn-take-photo', () => {
     c.getContext('2d').drawImage(v, 0, 0);
 
     UI.editor.imgPreview.src = c.toDataURL('image/jpeg', 0.7);
-    UI.editor.imgContainer.classList.remove('hidden');
+    UI.editor.imgContainer.classList.remove('hidden'); // Pokazanie kontenera ze zdjęciem
     stopCamera();
 });
 
-/**
- * Zatrzymuje strumień wideo i ukrywa interfejs kamery.
- */
 function stopCamera() {
     if (cameraStream) {
         cameraStream.getTracks().forEach(t => t.stop());
@@ -69,30 +66,46 @@ function stopCamera() {
     UI.editor.btnCamera.classList.remove('hidden');
 }
 
-// Obsługa mowy
+// --- POPRAWIONA OBSŁUGA MOWY ---
 addClick('btn-speech', () => {
-    if (!Speech.available()) return showModal('Info', 'Brak obsługi mowy.');
+    if (!Speech.available()) return showModal('Info', 'Twoja przeglądarka nie obsługuje dyktowania.');
 
     if (isListening) {
+        // Użytkownik chce przerwać
         Speech.stop();
-        isListening = false;
-        UI.editor.btnSpeech.classList.add('outline');
-        UI.editor.btnSpeech.classList.remove('danger');
+        stopListeningUI();
     } else {
-        isListening = true;
-        UI.editor.btnSpeech.classList.remove('outline');
-        UI.editor.btnSpeech.classList.add('danger');
+        // Start nagrywania
+        startListeningUI();
 
         Speech.start(
             (text) => {
                 const val = UI.editor.body.value;
-                UI.editor.body.value = val + (val ? ' ' : '') + text;
+                UI.editor.body.value = val + (val.length > 0 ? ' ' : '') + text;
             },
-            () => { isListening = false; UI.editor.btnSpeech.classList.remove('danger'); UI.editor.btnSpeech.classList.add('outline'); },
-            () => { isListening = false; UI.editor.btnSpeech.classList.remove('danger'); UI.editor.btnSpeech.classList.add('outline'); }
+            (error) => {
+                console.warn(error);
+                stopListeningUI();
+            },
+            () => {
+                stopListeningUI();
+            }
         );
     }
 });
+
+// Pomocnicze funkcje UI do mikrofonu
+function startListeningUI() {
+    isListening = true;
+    UI.editor.btnSpeech.classList.remove('outline');
+    UI.editor.btnSpeech.classList.add('danger');
+}
+
+function stopListeningUI() {
+    isListening = false;
+    UI.editor.btnSpeech.classList.remove('danger');
+    UI.editor.btnSpeech.classList.add('outline');
+}
 
 window.addEventListener('online', () => UI.common.offlineIndicator.style.display = 'none');
 window.addEventListener('offline', () => UI.common.offlineIndicator.style.display = 'block');
